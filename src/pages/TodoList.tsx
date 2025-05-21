@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { todosAPI } from "../services/api";
-import { Todo, CreateTodoInput, UpdateTodoInput } from "../types";
+import type { Todo, CreateTodoInput, UpdateTodoInput } from "../types";
 import TodoItem from "../components/TodoItem";
 import TodoForm from "../components/TodoForm";
 import TodoFilter from "../components/TodoFilter";
@@ -15,7 +15,6 @@ const TodoList = () => {
   const {
     data: todos = [],
     isLoading,
-    error,
     isError,
     refetch,
   } = useQuery({

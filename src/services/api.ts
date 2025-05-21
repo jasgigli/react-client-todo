@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { Todo, CreateTodoInput, UpdateTodoInput } from "../types";
+import type { Todo, CreateTodoInput, UpdateTodoInput } from "../types";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 

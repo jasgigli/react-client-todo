@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Todo, CreateTodoInput } from "../types";
+import type { Todo, CreateTodoInput } from "../types";
 
 interface TodoFormProps {
   onSubmit: (values: CreateTodoInput) => Promise<void>;
