@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { todosAPI } from "../services/api";
 import { Todo, CreateTodoInput, UpdateTodoInput } from "../types";
@@ -16,16 +16,33 @@ const TodoList = () => {
     data: todos = [],
     isLoading,
     error,
+    isError,
+    refetch,
   } = useQuery({
     queryKey: ["todos"],
     queryFn: todosAPI.getAll,
+    retry: 1,
+    staleTime: 30000, // 30 seconds
   });
+
+  // Refetch on component mount to ensure fresh data
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  // State for mutation errors
+  const [mutationError, setMutationError] = useState<string | null>(null);
 
   // Create todo mutation
   const createTodoMutation = useMutation({
     mutationFn: todosAPI.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
+      setMutationError(null);
+    },
+    onError: (error: Error) => {
+      setMutationError(`Failed to create todo: ${error.message}`);
+      console.error("Create todo error:", error);
     },
   });
 
@@ -36,6 +53,11 @@ const TodoList = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
       setEditingTodo(null);
+      setMutationError(null);
+    },
+    onError: (error: Error) => {
+      setMutationError(`Failed to update todo: ${error.message}`);
+      console.error("Update todo error:", error);
     },
   });
 
@@ -44,6 +66,11 @@ const TodoList = () => {
     mutationFn: todosAPI.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
+      setMutationError(null);
+    },
+    onError: (error: Error) => {
+      setMutationError(`Failed to delete todo: ${error.message}`);
+      console.error("Delete todo error:", error);
     },
   });
 
@@ -85,6 +112,37 @@ const TodoList = () => {
         <h2 className="text-xl font-semibold mb-4">
           {editingTodo ? "Edit Todo" : "Add New Todo"}
         </h2>
+
+        {mutationError && (
+          <div
+            className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+            role="alert"
+          >
+            <strong className="font-bold">Error!</strong>
+            <span className="block sm:inline"> {mutationError}</span>
+            <button
+              onClick={() => setMutationError(null)}
+              className="absolute top-0 bottom-0 right-0 px-4 py-3"
+            >
+              <span className="sr-only">Dismiss</span>
+              <svg
+                className="h-6 w-6 text-red-500"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
+
         <TodoForm
           onSubmit={editingTodo ? handleUpdateTodo : handleCreateTodo}
           initialValues={editingTodo || undefined}
@@ -104,7 +162,7 @@ const TodoList = () => {
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent"></div>
             <p className="mt-2 text-gray-600">Loading todos...</p>
           </div>
-        ) : error ? (
+        ) : isError ? (
           <div
             className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
             role="alert"
@@ -114,6 +172,12 @@ const TodoList = () => {
               {" "}
               Failed to load todos. Please try again.
             </span>
+            <button
+              onClick={() => refetch()}
+              className="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              Retry
+            </button>
           </div>
         ) : filteredTodos.length === 0 ? (
           <div className="text-center py-10 bg-white rounded-lg border border-gray-200">

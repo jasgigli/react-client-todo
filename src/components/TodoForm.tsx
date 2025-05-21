@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { Todo, CreateTodoInput } from '../types';
+import { useState } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { Todo, CreateTodoInput } from "../types";
 
 interface TodoFormProps {
   onSubmit: (values: CreateTodoInput) => Promise<void>;
@@ -10,17 +10,22 @@ interface TodoFormProps {
   isEditing?: boolean;
 }
 
-const TodoForm = ({ onSubmit, initialValues, onCancel, isEditing = false }: TodoFormProps) => {
+const TodoForm = ({
+  onSubmit,
+  initialValues,
+  onCancel,
+  isEditing = false,
+}: TodoFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formik = useFormik({
     initialValues: {
-      title: initialValues?.title || '',
-      description: initialValues?.description || '',
+      title: initialValues?.title || "",
+      description: initialValues?.description || "",
       completed: initialValues?.completed || false,
     },
     validationSchema: Yup.object({
-      title: Yup.string().required('Title is required'),
+      title: Yup.string().required("Title is required"),
       description: Yup.string(),
       completed: Yup.boolean(),
     }),
@@ -38,9 +43,15 @@ const TodoForm = ({ onSubmit, initialValues, onCancel, isEditing = false }: Todo
   });
 
   return (
-    <form onSubmit={formik.handleSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <form
+      onSubmit={formik.handleSubmit}
+      className="space-y-4 bg-white p-6 rounded-lg shadow-sm border border-gray-200"
+    >
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="title"
+          className="block text-sm font-medium text-gray-700"
+        >
           Title
         </label>
         <input
@@ -59,7 +70,10 @@ const TodoForm = ({ onSubmit, initialValues, onCancel, isEditing = false }: Todo
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="description"
+          className="block text-sm font-medium text-gray-700"
+        >
           Description (optional)
         </label>
         <textarea
@@ -84,7 +98,10 @@ const TodoForm = ({ onSubmit, initialValues, onCancel, isEditing = false }: Todo
             checked={formik.values.completed}
             onChange={formik.handleChange}
           />
-          <label htmlFor="completed" className="ml-2 block text-sm text-gray-700">
+          <label
+            htmlFor="completed"
+            className="ml-2 block text-sm text-gray-700"
+          >
             Mark as completed
           </label>
         </div>
@@ -102,10 +119,19 @@ const TodoForm = ({ onSubmit, initialValues, onCancel, isEditing = false }: Todo
         )}
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400"
+          disabled={isSubmitting || !formik.isValid || !formik.dirty}
+          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 min-w-[100px]"
         >
-          {isSubmitting ? 'Saving...' : isEditing ? 'Update Todo' : 'Add Todo'}
+          {isSubmitting ? (
+            <span className="flex items-center justify-center">
+              <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-solid border-white border-r-transparent"></div>
+              Saving...
+            </span>
+          ) : isEditing ? (
+            "Update Todo"
+          ) : (
+            "Add Todo"
+          )}
         </button>
       </div>
     </form>
